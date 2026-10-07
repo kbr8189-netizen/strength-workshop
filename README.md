@@ -8,7 +8,8 @@
 ## 구성
 
 - Next.js (App Router) + TypeScript + Tailwind CSS
-- 저장: Vercel Blob **비공개** 스토어 (`strength-workshop/member/<id>.json`, 다른 워크숍 앱과 스토어를 함께 써도 됨)
+- 저장: Upstash Redis (Vercel 마켓플레이스, 무료 플랜) — 해시 `strength-workshop:members` 하나에 참여자 전체 저장. 지도 1회 조회 = Redis 명령 1회
+- 연결 점검: `/api/health`
 - 문구·강점 설명 수정: `lib/strengths.ts`
 
 ## 환경 변수 (Vercel 프로젝트 설정)
@@ -16,11 +17,11 @@
 | 이름 | 설명 |
 | --- | --- |
 | `ADMIN_PASSWORD` | 강사 화면 비밀번호 |
-| `BLOB_READ_WRITE_TOKEN` | Blob 스토어를 프로젝트에 연결하면 자동 설정 |
+| `KV_REST_API_URL`, `KV_REST_API_TOKEN` | Upstash Redis를 프로젝트에 연결하면 자동 설정 (`UPSTASH_REDIS_REST_URL`/`_TOKEN`도 인식) |
 
 ## 로컬 실행
 
 ```bash
 npm install
-ADMIN_PASSWORD=test npm run dev   # Blob 토큰이 없으면 .data/ 폴더에 저장
+ADMIN_PASSWORD=test npm run dev   # Redis 환경 변수가 없으면 .data/ 폴더에 저장
 ```

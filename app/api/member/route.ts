@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { memberKey } from "@/lib/keys";
-import { readJson, writeJson } from "@/lib/store";
+import { isValidId } from "@/lib/keys";
+import { getMember, saveMember } from "@/lib/db";
 import { cleanTop5, type Member } from "@/lib/strengths";
 
 // 내 대표강점 저장 (처음이면 id 발급, 이후 같은 id로 덮어쓰기)
@@ -20,12 +20,12 @@ export async function POST(request: Request) {
   }
 
   let id = typeof body?.id === "string" ? body.id : "";
-  if (id && !memberKey(id)) id = "";
+  if (id && !isValidId(id)) id = "";
   if (!id) id = randomUUID();
 
   const record: Member = { id, name, top5, updatedAt: new Date().toISOString() };
   try {
-    await writeJson(memberKey(id)!, record);
+    await saveMember(record);
     return Response.json({ record });
   } catch (e) {
     console.error("save member failed", e);
@@ -35,8 +35,8 @@ export async function POST(request: Request) {
 }
 
 export async function GET(request: Request) {
-  const key = memberKey(new URL(request.url).searchParams.get("id") ?? "");
-  if (!key) return Response.json({ error: "잘못된 요청입니다." }, { status: 400 });
-  const record = await readJson<Member>(key);
+  const id = new URL(request.url).searchParams.get("id") ?? "";
+  if (!isValidId(id)) return Response.json({ error: "잘못된 요청입니다." }, { status: 400 });
+  const record = await getMember(id);
   return record ? Response.json({ record }) : Response.json({ error: "없음" }, { status: 404 });
 }

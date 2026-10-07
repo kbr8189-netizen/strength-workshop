@@ -252,7 +252,7 @@ function TeamMap({ profile, onEdit }: { profile: Profile | null; onEdit: () => v
 
   useEffect(() => {
     fetchMap();
-    const t = setInterval(fetchMap, 15000);
+    const t = setInterval(fetchMap, 20000);
     return () => clearInterval(t);
   }, [fetchMap]);
 
@@ -269,7 +269,7 @@ function TeamMap({ profile, onEdit }: { profile: Profile | null; onEdit: () => v
       )}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <p className="text-sm text-slate-500">
-          {members ? `지금까지 ${members.length}명이 참여했어요 · 15초마다 자동으로 갱신돼요` : ""}
+          {members ? `지금까지 ${members.length}명이 참여했어요 · 20초마다 자동으로 갱신돼요` : ""}
         </p>
         <button onClick={fetchMap} className={`${btn} ${btnOff} inline-flex items-center gap-1.5 px-3 py-1.5 text-sm`}>
           <RefreshCw className="h-4 w-4" /> 새로고침

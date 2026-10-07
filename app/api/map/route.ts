@@ -1,13 +1,12 @@
-import { MEMBER_PREFIX } from "@/lib/keys";
-import { listJson } from "@/lib/store";
-import type { MapMember, Member } from "@/lib/strengths";
+import { listMembers } from "@/lib/db";
+import type { MapMember } from "@/lib/strengths";
 
 export const dynamic = "force-dynamic";
 
 // 팀 강점지도용 공개 데이터 (이름·대표강점만)
 export async function GET() {
   try {
-    const all = await listJson<Member>(MEMBER_PREFIX);
+    const all = await listMembers();
     const members: MapMember[] = all
       .map(({ name, top5, updatedAt }) => ({ name, top5, updatedAt }))
       .sort((a, b) => a.name.localeCompare(b.name, "ko"));

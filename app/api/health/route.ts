@@ -1,22 +1,18 @@
-import { writeJson, readJson } from "@/lib/store";
+import { listMembers } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 
-// 저장소 연결 점검: 작은 점검용 파일 하나를 덮어쓰고 다시 읽어 봅니다.
+// 저장소 연결 점검: 저장된 인원 수를 읽어 봅니다.
 export async function GET() {
-  const key = "strength-workshop/_health.json";
-  const auth = {
-    readWriteToken: Boolean(process.env.BLOB_READ_WRITE_TOKEN),
-    storeId: Boolean(process.env.BLOB_STORE_ID),
-    vercelEnv: process.env.VERCEL_ENV ?? null,
-  };
+  const redisConfigured = Boolean(
+    (process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL) &&
+      (process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN),
+  );
   try {
-    const at = new Date().toISOString();
-    await writeJson(key, { at });
-    const back = await readJson<{ at: string }>(key);
-    return Response.json({ ok: back?.at === at, auth });
+    const members = await listMembers();
+    return Response.json({ ok: true, redisConfigured, members: members.length });
   } catch (e) {
     const err = e as Error;
-    return Response.json({ ok: false, auth, error: `${err.name}: ${err.message}` });
+    return Response.json({ ok: false, redisConfigured, error: `${err.name}: ${err.message}` });
   }
 }
