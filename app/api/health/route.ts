@@ -17,6 +17,6 @@ export async function GET() {
     return Response.json({ ok: back?.at === at, auth });
   } catch (e) {
     const err = e as Error;
-    return Response.json({ ok: false, auth, error: `${err.name}: ${err.message}` }, { status: 500 });
+    return Response.json({ ok: false, auth, error: `${err.name}: ${err.message}` });
   }
 }
