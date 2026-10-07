@@ -8,7 +8,7 @@
 ## 구성
 
 - Next.js (App Router) + TypeScript + Tailwind CSS
-- 저장: Vercel Blob **비공개** 스토어 (`member/<id>.json`)
+- 저장: Vercel Blob **비공개** 스토어 (`strength-workshop/member/<id>.json`, 다른 워크숍 앱과 스토어를 함께 써도 됨)
 - 문구·강점 설명 수정: `lib/strengths.ts`
 
 ## 환경 변수 (Vercel 프로젝트 설정)
