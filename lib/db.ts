@@ -7,8 +7,15 @@ import type { Member } from "@/lib/strengths";
 // 로컬 개발에서 Redis 환경 변수가 없으면 .data/members.json 파일에 저장합니다.
 
 const HASH = "strength-workshop:members";
-const URL_ = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || "";
-const TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || "";
+// 연결 시 prefix(KV, STORAGE 등)가 달라도 *_REST_API_URL / *_REST_API_TOKEN 이름을 찾아 씁니다.
+function findEnv(suffix: string, preferred: string[]) {
+  for (const k of preferred) if (process.env[k]) return process.env[k]!;
+  const key = Object.keys(process.env).find((k) => k.endsWith(suffix) && !k.includes("READ_ONLY"));
+  return key ? process.env[key]! : "";
+}
+const URL_ = findEnv("_REST_API_URL", ["KV_REST_API_URL", "UPSTASH_REDIS_REST_URL"]);
+const TOKEN = findEnv("_REST_API_TOKEN", ["KV_REST_API_TOKEN", "UPSTASH_REDIS_REST_TOKEN"]);
+export const redisConfigured = Boolean(URL_ && TOKEN);
 const LOCAL = !URL_ && process.env.NODE_ENV !== "production";
 const LOCAL_FILE = path.join(process.cwd(), ".data", "members.json");
 
