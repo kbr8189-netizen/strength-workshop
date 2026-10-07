@@ -29,7 +29,8 @@ export async function POST(request: Request) {
     return Response.json({ record });
   } catch (e) {
     console.error("save member failed", e);
-    return Response.json({ error: "저장 중 문제가 생겼어요. 잠시 후 다시 시도해주세요." }, { status: 500 });
+    const detail = e instanceof Error ? e.message.slice(0, 200) : "";
+    return Response.json({ error: "저장 중 문제가 생겼어요. 잠시 후 다시 시도해주세요.", detail }, { status: 500 });
   }
 }
 
