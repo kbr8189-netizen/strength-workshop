@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Download, LogOut, Maximize2, Minimize2, RefreshCw, Trash2 } from "lucide-react";
 import StrengthMap from "@/components/StrengthMap";
-import { GROUPS, STRENGTH_BY_KEY, WORKSHOP, type Member } from "@/lib/strengths";
+import { STRENGTH_BY_KEY, WORKSHOP, type Member } from "@/lib/strengths";
 
 type View = "map" | "list";
 const btn = "rounded-xl border-2 font-bold shadow-sm transition";
@@ -14,8 +14,7 @@ function csvCell(v: unknown) {
   const s = String(v ?? "");
   return /[",\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
 }
-const byGroup = (a: Member, b: Member) =>
-  GROUPS.indexOf(a.group) - GROUPS.indexOf(b.group) || a.name.localeCompare(b.name, "ko");
+const byName = (a: Member, b: Member) => a.name.localeCompare(b.name, "ko");
 
 export default function Dashboard() {
   const [members, setMembers] = useState<Member[]>([]);
@@ -24,7 +23,6 @@ export default function Dashboard() {
   const [auto, setAuto] = useState(true);
   const [view, setView] = useState<View>("map");
   const [big, setBig] = useState(false);
-  const [filter, setFilter] = useState("전체");
   const [confirmId, setConfirmId] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -35,7 +33,7 @@ export default function Dashboard() {
     if (!res || !res.ok) setError(data.error || "불러오지 못했습니다.");
     else {
       setError("");
-      setMembers([...(data.members as Member[])].sort(byGroup));
+      setMembers([...(data.members as Member[])].sort(byName));
     }
     setLoading(false);
   }, []);
@@ -49,8 +47,6 @@ export default function Dashboard() {
     return () => clearInterval(t);
   }, [auto, load]);
 
-  const groups = useMemo(() => GROUPS.filter((g) => members.some((m) => m.group === g)), [members]);
-  const shown = filter === "전체" ? members : members.filter((m) => m.group === filter);
 
   async function remove(id: string) {
     const res = await fetch(`/api/admin/data?id=${encodeURIComponent(id)}`, { method: "DELETE" });
@@ -60,9 +56,8 @@ export default function Dashboard() {
   }
 
   function downloadCsv() {
-    const header = ["조", "이름", "1위", "2위", "3위", "4위", "5위", "저장 시각"];
+    const header = ["이름", "1위", "2위", "3위", "4위", "5위", "저장 시각"];
     const rows = members.map((m) => [
-      m.group,
       m.name,
       ...m.top5.map((k) => STRENGTH_BY_KEY[k]?.name ?? k),
       new Date(m.updatedAt).toLocaleString("ko-KR"),
@@ -87,7 +82,7 @@ export default function Dashboard() {
           <div className="text-xs font-bold tracking-wide text-blue-700">강사 화면 · {WORKSHOP.courseTitle}</div>
           <h1 className="mt-1 text-2xl font-extrabold">{WORKSHOP.title}</h1>
           <p className="mt-1 text-sm text-slate-500">
-            {members.length}명 입력 · {groups.length}개 조 {loading && "· 갱신 중…"}
+            {members.length}명 참여 {loading && "· 갱신 중…"}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -120,31 +115,17 @@ export default function Dashboard() {
             </button>
           )}
         </div>
-        <div className="flex flex-wrap gap-1.5">
-          {["전체", ...groups].map((g) => (
-            <button
-              key={g}
-              onClick={() => setFilter(g)}
-              className={`rounded-full border px-3 py-1 text-sm font-bold ${
-                filter === g ? "border-slate-900 bg-slate-900 text-white" : "border-slate-300 bg-white text-slate-700"
-              }`}
-            >
-              {g}
-            </button>
-          ))}
-        </div>
       </div>
 
       {error && <div className="mb-4 text-sm font-bold text-rose-600">{error}</div>}
 
       {view === "map" ? (
-        <StrengthMap key={filter} members={shown} big={big} />
+        <StrengthMap members={members} big={big} />
       ) : (
         <div className="overflow-x-auto rounded-2xl border border-slate-200 bg-white">
-          <table className="w-full min-w-[640px] text-sm">
+          <table className="w-full min-w-[560px] text-sm">
             <thead className="bg-slate-50 text-left text-xs text-slate-500">
               <tr>
-                <th className="px-3 py-2">조</th>
                 <th className="px-3 py-2">이름</th>
                 <th className="px-3 py-2">대표강점 1~5위</th>
                 <th className="px-3 py-2">저장 시각</th>
@@ -152,9 +133,8 @@ export default function Dashboard() {
               </tr>
             </thead>
             <tbody>
-              {shown.map((m) => (
+              {members.map((m) => (
                 <tr key={m.id} className="border-t border-slate-100">
-                  <td className="whitespace-nowrap px-3 py-2">{m.group}</td>
                   <td className="whitespace-nowrap px-3 py-2 font-bold">{m.name}</td>
                   <td className="px-3 py-2">{m.top5.map((k) => STRENGTH_BY_KEY[k]?.name ?? k).join(" · ")}</td>
                   <td className="whitespace-nowrap px-3 py-2 text-xs text-slate-500">
@@ -178,9 +158,9 @@ export default function Dashboard() {
                   </td>
                 </tr>
               ))}
-              {!shown.length && (
+              {!members.length && (
                 <tr>
-                  <td colSpan={5} className="px-3 py-8 text-center text-slate-500">
+                  <td colSpan={4} className="px-3 py-8 text-center text-slate-500">
                     아직 입력이 없습니다.
                   </td>
                 </tr>

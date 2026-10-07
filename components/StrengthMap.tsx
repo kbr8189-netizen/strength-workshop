@@ -116,7 +116,7 @@ export default function StrengthMap({
             <div className="mt-3 flex flex-wrap gap-1.5">
               {st.holders[selected.key].map((h, i) => (
                 <span key={i} className="rounded-full bg-slate-100 px-3 py-1 text-sm">
-                  {h.group} {h.name}
+                  {h.name}
                   <b className="ml-1 text-xs font-medium text-slate-500">{h.rank}위</b>
                 </span>
               ))}
@@ -184,7 +184,6 @@ export default function StrengthMap({
             >
               <div className="flex items-baseline justify-between gap-2">
                 <b className="break-all">{m.name}</b>
-                <span className="shrink-0 text-xs text-slate-500">{m.group}</span>
               </div>
               <ol className="mt-2 space-y-1">
                 {m.top5.map((k, r) => {

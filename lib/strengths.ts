@@ -7,9 +7,6 @@ export const WORKSHOP = {
   viaUrl: "https://www.viacharacter.org/",
 };
 
-// 조 목록
-export const GROUPS = Array.from({ length: 10 }, (_, i) => `${i + 1}조`);
-
 export type VirtueKey = "wis" | "cou" | "hum" | "jus" | "tem" | "tra";
 
 export const VIRTUES: { key: VirtueKey; name: string; color: string; question: string }[] = [
@@ -57,7 +54,6 @@ export const VIRTUE_BY_KEY = Object.fromEntries(VIRTUES.map((v) => [v.key, v])) 
 export type Member = {
   id: string;
   name: string;
-  group: string;
   top5: string[];
   updatedAt: string;
 };
@@ -74,7 +70,7 @@ export function cleanTop5(input: unknown): string[] | null {
 
 export type MapStats = {
   count: Record<string, number>;
-  holders: Record<string, { name: string; group: string; rank: number }[]>;
+  holders: Record<string, { name: string; rank: number }[]>;
   virtueScore: Record<VirtueKey, number>;
   virtueTotal: number;
   maxCount: number;
@@ -94,7 +90,7 @@ export function computeStats(members: MapMember[]): MapStats {
       const s = STRENGTH_BY_KEY[k];
       if (!s) return;
       count[k]++;
-      holders[k].push({ name: m.name, group: m.group, rank: i + 1 });
+      holders[k].push({ name: m.name, rank: i + 1 });
       virtueScore[s.virtue] += 5 - i;
     });
   }
